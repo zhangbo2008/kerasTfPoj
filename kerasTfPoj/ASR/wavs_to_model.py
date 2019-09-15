@@ -47,19 +47,25 @@ def create_datasets():
     testlabels=np.array(testlabels)
     return (wavs,labels),(testwavs,testlabels)
 
-
+#下行是核心函数,语音需要一个mfcc的数据转化
 def get_wav_mfcc(wav_path):
     f = wave.open(wav_path,'rb')
     params = f.getparams()
     # print("params:",params)
     nchannels, sampwidth, framerate, nframes = params[:4]
+
     strData = f.readframes(nframes)#读取音频，字符串格式
     waveData = np.fromstring(strData,dtype=np.int16)#将字符串转化为int
-    waveData = waveData*1.0/(max(abs(waveData)))#wave幅值归一化
-    waveData = np.reshape(waveData,[nframes,nchannels]).T
-    f.close()
 
-    ### 对音频数据进行长度大小的切割，保证每一个的长度都是一样的【因为训练文件全部是1秒钟长度，16000帧的，所以这里需要把每个语音文件的长度处理成一样的】
+    waveData = waveData*1.0/(max(abs(waveData)))#wave幅值归一化
+    waveData = np.reshape(waveData,[nframes,nchannels]).T # 语音数据 针和通道. 一个针有多少通道就表示多少个int
+    f.close()
+    '''
+    #对音频数据进行长度大小的切割，保证每一个的长度都是一样的【因为训
+    练文件全部是1秒钟长度，16000帧的，所以这里需要把每个语音文件的长度处
+    理成一样的】
+ 
+    '''
     data = list(np.array(waveData[0]))
     # print(len(data))
     while len(data)>16000:
@@ -77,7 +83,9 @@ def get_wav_mfcc(wav_path):
     data = data ** 0.5
 
     return data
-
+    '''
+    只是一个分类模型意义不大
+    '''
 
 if __name__ == '__main__':
     (wavs,labels),(testwavs,testlabels) = create_datasets()
